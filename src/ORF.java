@@ -84,6 +84,7 @@ public class ORF {
 
     private int startIndex;
     private int stopIndex;
+    // sequence is always in 5' to 3' direction.
     private String sequence;
     private String acidSequence = null;
     // 0 meaning 5' to 3'. 1 meaning 3' to 5'
@@ -194,9 +195,7 @@ public class ORF {
                     }
                 }
                 if(!nestedSequence){
-                    String sequence = new StringBuilder(
-                            dnaSequence.substring(stopCodonIndex, startCodonIndex+3)).reverse().toString();
-                    ORF orf = new ORF(startCodonIndex, stopCodonIndex, sequence, 1);
+                    ORF orf = new ORF(startCodonIndex, stopCodonIndex, dnaSequence.substring(stopCodonIndex, startCodonIndex+3), 1);
                     ORF.calcORFAcidSeq(orf);
                     matches.add(orf);
                 }
@@ -242,10 +241,14 @@ public class ORF {
 
     /*
         Calculate the Acid Sequence of the given ORF
+            Taking into account differnet logic depending on direction.
+            if ORF direction is 3' to 5' then reverse the sequence and then use the 3to5 map
      */
     private static void calcORFAcidSeq(ORF orf) {
         StringBuilder str = new StringBuilder();
         StringBuilder dnaSequence = new StringBuilder(orf.sequence);
+        if(orf.direction == 1)
+            dnaSequence.reverse();
         // For each Codon, look it up in the map corresponding to the direction
         for (int i = 0; i < dnaSequence.length(); i += 3) {
             if(orf.direction == 0){
