@@ -7,11 +7,21 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
-        if(args.length < 1){
-            System.out.println("Please give name of fasta file as program argument. IE: test.fasta");
+        boolean validInput = false;
+        System.out.println("Please enter path/name of fasta file containing one DNA sequence: ");
+        Scanner sc = new Scanner(System.in);
+        File file = null;
+        while(!validInput){
+            file = new File(sc.nextLine());
+            validInput = file.exists();
+            if(!validInput)
+                System.out.println("File " + file.getName() + " was not found. Please enter a new file ");
         }
-        StringBuilder dnaSequence = getDNAFromFile(args[0]);
-        ArrayList<ORF> orfs = ORF.findORFs(dnaSequence);
+        System.out.println("Please enter minimum ORF length in nucleotides: ");
+        int minSeqLength = Integer.parseInt(sc.nextLine());
+        sc.close();
+        StringBuilder dnaSequence = getDNAFromFile(file);
+        ArrayList<ORF> orfs = ORF.findORFs(dnaSequence, minSeqLength);
         if(orfs == null || orfs.isEmpty()){
             System.out.println("No ORFs Found");
             System.exit(0);
@@ -21,10 +31,10 @@ public class Main {
         }
 }
 
-    private static StringBuilder getDNAFromFile(String file) {
+    private static StringBuilder getDNAFromFile(File file) {
         StringBuilder sequence = new StringBuilder();
         try {
-            Scanner sc = new Scanner(new File(file));
+            Scanner sc = new Scanner(file);
             String title = sc.nextLine().substring(1);
             System.out.println("Showing ORFs found in " + title);
             while(sc.hasNextLine()){
@@ -36,16 +46,4 @@ public class Main {
         }
         return sequence;
     }
-
-
-    private static Scanner getScannerFromFile(String file) {
-        Scanner sc = null;
-            try {
-                sc = new Scanner(new File(file));
-            } catch (FileNotFoundException e) {
-                System.out.println("File Not Found. Please try again");
-            }
-            return sc;
-        }
-
-    }
+}
